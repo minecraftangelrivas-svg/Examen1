@@ -5,6 +5,22 @@ import java.util.Scanner;
 
 public class main {
 
+    public static double vali(Scanner entrada) {
+
+        double deposito;
+        System.out.println("Ingrese el monto a depositar:");
+        deposito = entrada.nextDouble();
+
+
+        while (deposito <= 0 || deposito > 5000) {
+            System.out.println("El monto a depositar no debe ser menor a 0 ni mayor de 5000");
+            System.out.println("Ingrese el monto a depositar:");
+            deposito = entrada.nextDouble();
+        }
+
+        return deposito; // 4. Retornamos 'deposito'
+    }
+
     public static void salida(int a) {
         if ( a == 0) {
             System.out.println("Se ha quedado sin intentos");
@@ -17,7 +33,7 @@ public class main {
         Scanner entrada = new Scanner(System.in);
 
         String nombre = "Angel Gabriel Rivas Arreola"; //aqui Guardo las variables para un cajero de una sola persona o datos fijos.
-        double saldon = 1_000.00;
+        double saldon = 1_000.00, deposito;
         double totaldepo = 0;
         int nc = 3017, pin = 2026;
         int comisionr = 10;
@@ -61,20 +77,8 @@ public class main {
 
                 case 2:
 
-                    System.out.println("Ingrese el monto a depositar.");
-                    double deposito = entrada.nextDouble();
+                    deposito = vali(entrada); // uso de metodo para realizar el proceso usando el escaner para que lo use en base al pedir datos
 
-
-                    while ( deposito <= 0 || deposito > 5000){
-
-                        System.out.println("El monto a depositar no debe ser menor a 0 ni mayor de 5000");
-
-
-                        System.out.println("Ingrese el monto a depositar.");
-                        deposito = entrada.nextDouble();
-
-                    }
-                    
                     depositoex++;
                     totaldepo += deposito;
                     System.out.println("Monto depositado: " + deposito);
