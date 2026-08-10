@@ -5,6 +5,39 @@ import java.util.Scanner;
 
 public class main {
 
+    public static double pRetiro(Scanner entrada, double saldo) {// retiro sin comision
+        double retiro;
+        System.out.println("Ingrese el monto a retirar (Normal):");
+        retiro = entrada.nextDouble();
+
+        // Validaciones Retiro Normal
+        if (retiro <= 0) { System.out.println("Rechazado: Monto inválido menor de 0."); return -1; }
+        if (retiro > 2000) { System.out.println("Rechazado: Supera límite Q2000."); return -1; }
+        if (retiro % 20 != 0) { System.out.println("Rechazado: Debe ser múltiplo de 20."); return -1; }
+        if (retiro > saldo) { System.out.println("Rechazado: Fondos insuficientes."); return -1; }
+
+        return retiro;
+    }
+
+    public static double pRetiro(Scanner entrada, double saldo, double comision) {// retiro con comision
+        double retiro;
+        System.out.println("Ingrese el monto a retirar (Red Externa):");
+        retiro = entrada.nextDouble();
+
+
+        if (retiro <= 0) { System.out.println("Rechazado: Monto inválido es menor de 0."); return -1; }
+        if (retiro > 2000) { System.out.println("Rechazado: Supera límite Q2000."); return -1; }
+        if (retiro % 20 != 0) { System.out.println("Rechazado: Debe ser múltiplo de 20."); return -1; }
+
+
+        if (retiro + comision > saldo) {
+            System.out.println("Rechazado: Fondos insuficientes para retiro + comisión.");
+            return -1;
+        }
+
+        return retiro;
+    }
+
     public static double vali(Scanner entrada) {
 
         double deposito;
@@ -21,6 +54,33 @@ public class main {
         return deposito; // 4. Retornamos 'deposito'
     }
 
+    public static double vali(Scanner entrada, double saldo) {
+
+            double retiro;
+            System.out.println("Ingrese el monto a retirar:");
+            retiro = entrada.nextDouble();
+
+            if (retiro <= 0) {
+                System.out.println("Rechazado: El monto debe ser mayor a Q0.00");
+                return -1; // Valor especial para indicar error
+            }
+            if (retiro > 2000) {
+                System.out.println("Rechazado: Supera el límite de Q2,000.00");
+                return -1;
+            }
+            if (retiro % 20 != 0) {
+                System.out.println("Rechazado: Debe ser múltiplo de Q20.00");
+                return -1;
+            }
+            if (retiro > saldo) {
+                System.out.println("Rechazado: Fondos insuficientes.");
+                return -1;
+            }
+
+            return retiro; // Si llega aquí, es válido
+
+    }
+
     public static void salida(int a) {
         if ( a == 0) {
             System.out.println("Se ha quedado sin intentos");
@@ -33,11 +93,12 @@ public class main {
         Scanner entrada = new Scanner(System.in);
 
         String nombre = "Angel Gabriel Rivas Arreola"; //aqui Guardo las variables para un cajero de una sola persona o datos fijos.
-        double saldon = 1_000.00, deposito;
-        double totaldepo = 0;
+        double saldon = 1_000.00;
+        double deposito, retiro; // datos de guardado
+        double totaldepo = 0, totalr = 0, totalco = 0;
         int nc = 3017, pin = 2026;
         int comisionr = 10;
-        int incorrecto = 0, depositoex = 0; //uso esta variable para datos o contadores
+        int incorrecto = 0, depositoex = 0, retiroex = 0, retiroplus = 0; //uso esta variable para datos o contadores
         int pint, opcion; // Guardo las opciones para guardar datos
 
 
@@ -92,13 +153,57 @@ public class main {
                     break;
 
                 case 3:
-                    System.out.println("Hola");
+                    double montoRetiro = pRetiro(entrada, saldon);
+
+                    if (montoRetiro == -1) {
+                        retiroex++; // Incrementa rechazados
+                        System.out.println("Operación rechazada. No se modificó el saldo.");
+                        break;
+                    }
+
+                    // --- ÉXITO: Actualizar datos ---
+                    double saldoAnterior = saldon;
+                    saldon -= montoRetiro;      // Descontar solo el monto
+                    totalr += montoRetiro;      // Acumular dinero entregado
+                    retiroplus++;               // Incrementar éxitos
+
+                    // --- Reporte Obligatorio ---
+                    System.out.println("--- Retiro Normal Exitoso ---");
+                    System.out.println("Monto solicitado: Q" + montoRetiro);
+                    System.out.println("Saldo anterior: Q" + saldoAnterior);
+                    System.out.println("Saldo actualizado: Q" + saldon);
+                    System.out.println("Cantidad de retiros exitosos: " + retiroplus);
+                    System.out.println("Total de dinero entregado en retiros: Q" + totalr);
                     break;
 
                 case 4:
-                    System.out.println("Hola");
-                    break;
+                    // Llamada a la versión sobrecargada de 3 parámetros
+                    double montoSolicitado = pRetiro(entrada, saldon, comisionr);
 
+                    if (montoSolicitado == -1) {
+                        retiroex++; // Incrementa rechazados
+                        System.out.println("Operación rechazada. No se modificó el saldo.");
+                        break;
+                    }
+
+                    // --- ÉXITO: Actualizar datos ---
+                    double saldoAnteriorComision = saldon;
+                    double totalDebitado = montoSolicitado + comisionr;
+
+                    saldon -= totalDebitado;    // Descontar monto + comisión
+                    totalco += comisionr;    // Acumular comisiones (NO es dinero entregado al usuario)
+                    totalr += montoSolicitado;  // Acumular solo el dinero que recibió el usuario
+                    retiroplus++;               // Incrementar éxitos
+
+                    // --- Reporte Obligatorio ---
+                    System.out.println("--- Retiro con Comisión Exitoso ---");
+                    System.out.println("Monto solicitado: Q" + montoSolicitado);
+                    System.out.println("Comisión: Q" + comisionr);
+                    System.out.println("Total debitado: Q" + totalDebitado);
+                    System.out.println("Saldo anterior: Q" + saldoAnteriorComision);
+                    System.out.println("Saldo actualizado: Q" + saldon);
+                    System.out.println("Total acumulado de comisiones cobradas: Q" + totalco);
+                    break;
                 case 5:
                     System.out.println("Hola");
                     break;
